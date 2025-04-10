@@ -24,11 +24,21 @@
 
 ### Установка на Keenetic/Netcraze и другие системы с Entware
 
-1. Выполнять от пользователя root на уже устанвоенную Entware
-   ```
-   opkg install curl
-  curl -sOfL https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/install.sh
-  chmod +x ./install.sh
-  ./install.sh
-   ```
+>  Выполнять от пользователя root на уже устанвоенную Entware
+
+```bash
+opkg install curl
+```
+
+```bash
+curl -sOfL https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/install.sh
+```
+
+```bash
+chmod +x ./install.sh
+```
+
+```bash
+./install.sh
+```
 
