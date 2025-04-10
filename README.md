@@ -31,7 +31,7 @@ opkg install curl
 ```
 
 ```bash
-curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/nfqws-updater.tar
+curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_l.sh
 ```
 
 ```bash
