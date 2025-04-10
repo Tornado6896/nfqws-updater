@@ -17,10 +17,28 @@
 
 ### Что это?
 
-`nfqws-updater`- небольшой скрипт для автоматизации установки NFQWS, 
-а также настройки ,автообновлений nfqws + user.list 
-с возможностью задать расписание в cron и уведомлениям об обновлении в telegram.
-
+`nfqws-updater`- небольшой скрипт для автоматизации установки NFQWS.
+## Возможности скрипта:
+- Полностью автоматическая установка nfqws(устанвока всех пакетов, user.list, создание политики, прописывание DOT/DOH, добваление задачи на проверку обновлений в cron);
+- Выбор даты и времени для добавления задачи проверки обновлений nfqws и user.list в cron;
+  <p align="left">
+  <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/cron.png" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="https://github.com/Tornado6896/nfqws-updater/blob/main/cron.png">
+      <img src="https://github.com/Tornado6896/nfqws-updater/blob/main/cron.png">
+    </picture>
+  </a>
+</p>
+- Отправка уведомлений в telegram об успешном обновлении user.list и служб nfqws(Для уведомлений нужно созадать бота в телеграмм);
+  <p align="left">
+  <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/tg.png" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="https://github.com/Tornado6896/nfqws-updater/blob/main/tg.png">
+      <img src="https://github.com/Tornado6896/nfqws-updater/blob/main/tg.png">
+    </picture>
+  </a>
+</p>
+- Полная переустановка nfqws.
 
 ### Установка на Keenetic/Netcraze и другие системы с Entware
 
@@ -42,3 +60,17 @@ chmod +x ./_i.sh
 ./_i.sh
 ```
 
+
+## Для вызова констестного меню можно восользоваться командой:
+
+```bash
+nfqws_menu
+```
+<p align="left">
+  <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png">
+      <img src="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png">
+    </picture>
+  </a>
+</p>
