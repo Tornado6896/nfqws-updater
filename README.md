@@ -35,10 +35,10 @@ curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_i.s
 ```
 
 ```bash
-chmod +x ./_l.sh
+chmod +x ./_i.sh
 ```
 
 ```bash
-./_.sh
+./_i.sh
 ```
 
