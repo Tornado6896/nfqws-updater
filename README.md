@@ -31,14 +31,14 @@ opkg install curl
 ```
 
 ```bash
-curl -sOfL https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/_install.sh
+curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/nfqws-updater.tar
 ```
 
 ```bash
-chmod +x ./_install.sh
+chmod +x ./_l.sh
 ```
 
 ```bash
-./_install.sh
+./_.sh
 ```
 
