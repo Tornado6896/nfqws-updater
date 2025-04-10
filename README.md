@@ -24,7 +24,7 @@
 
 ### Установка на Keenetic/Netcraze и другие системы с Entware
 
->  Выполнять от пользователя root на уже устанвоенную Entware
+>  Выполнять от пользователя root на уже установленную Entware
 
 ```bash
 opkg install curl
