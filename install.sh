@@ -1,2 +1,14 @@
 opkg install tar
-curl -s -L https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws.tar --output nfqws.tar && tar -xvf nfqws.tar -C /opt/usr/bin --overwrite > /dev/null && rm nfqws.tar
+fileinstlocal=nfqws_install.sh
+fileupdateLocal=nfqws_update.sh
+fileupdate=https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/nfqws_install.sh
+fileinst=https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/nfqws_update.sh
+fileDir="/opt/usr/bin/"
+
+wget "$fileupdate" -P "$fileDir"
+wget "$fileinst" -P "$fileDir"
+chmod +x "$fileDir""$fileinstlocal"
+chmod +x "$fileDir""$fileupdateLocal"
+
+nfqws_install.sh
+ 
