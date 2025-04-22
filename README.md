@@ -45,19 +45,7 @@
 >  Выполнять от пользователя root на уже установленную Entware
 
 ```bash
-opkg install curl
-```
-
-```bash
-curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_i.sh
-```
-
-```bash
-chmod +x ./_i.sh
-```
-
-```bash
-./_i.sh
+curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_i.sh && ./_i.sh
 ```
 
 
