@@ -57,8 +57,8 @@ nfqws_updater
 <p align="left">
   <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png" target="_blank" rel="noopener noreferrer">
     <picture>
-      <source media="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png">
-      <img src="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png">
+      <source media="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_help.png">
+      <img src="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_help.png">
     </picture>
   </a>
 </p>
