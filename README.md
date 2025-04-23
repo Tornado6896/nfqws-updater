@@ -45,14 +45,14 @@
 >  Выполнять от пользователя root на уже установленную Entware
 
 ```bash
-curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_i.sh && ./_i.sh
+curl -sOfL https://github.com/Tornado6896/nfqws-updater/raw/refs/heads/main/_i.sh && chmod +x ./_i.sh && ./_i.sh
 ```
 
 
 ## Для вызова констестного меню можно восользоваться командой:
 
 ```bash
-nfqws_menu
+nfqws_updater
 ```
 <p align="left">
   <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png" target="_blank" rel="noopener noreferrer">
