@@ -615,6 +615,7 @@ ndmc -c dns-proxy https upstream https://ns4.opennameserver.org/dns-query
 ndmc -c system configuration save
 ndmc -c dns-proxy https upstream https://doh.dns.sb/dns-query dnsm
 ndmc -c system configuration save
+sleep 5s
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 sendTelegram "$RoutID: DNS записи и политика добавлены";
 fi
@@ -629,6 +630,18 @@ registerCron;
 crontabs;
 dns_add;
 choose_cron_time;
+green="\033[32m"
+red="\033[31m"
+yellow="\033[33m"
+reset="\033[0m" 
+echo -e "Доступные команды:$1 \n${green}-menu${reset} - Главное меню
+${green}-update-userlist${reset} - Обновление userlist
+${green}-update-nfqws${reset} - Обновление nfqws
+${green}-token${reset} - Настройка телеграма
+${green}-restart-nfqws${reset} - Перезагрузка nfqws
+${green}-remove-nfqws${reset} - Удаление nfqws
+${green}-install-nfqws${reset} - Установка nfqws
+${green}-time-update${reset} - Установка даты и время проверки обновлений nfqws и userlist"
 }
 case "$1" in
     -menu)
