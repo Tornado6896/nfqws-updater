@@ -138,7 +138,7 @@ echo "Обновление UserList"
 function menu {
  
             echo
-            echo "  Выберите пункт"
+            echo "  Выберите пункт:"
             echo "     1. Выполнить полную установку nfqws"
             echo "     2. Изменить данные telegram"
             echo "     3. Выполниить обновление nfqws"
@@ -636,7 +636,7 @@ green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
-echo -e "Доступные команды для ${red}nfqws_updater:${reset}:$1 \n${green}-menu${reset} - Главное меню
+echo -e "Доступные команды для ${red}nfqws_updater:{reset} $1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
 ${green}-update-nfqws${reset} - Обновление nfqws
 ${green}-token${reset} - Настройка телеграма
@@ -675,7 +675,7 @@ case "$1" in
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
-echo -e "Доступные команды для ${red}nfqws_updater:${reset}$1 \n${green}-menu${reset} - Главное меню
+echo -e "Доступные команды для ${red}nfqws_updater${reset} $1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
 ${green}-update-nfqws${reset} - Обновление nfqws
 ${green}-token${reset} - Настройка телеграма
