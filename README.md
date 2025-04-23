@@ -25,7 +25,6 @@
 - Обновление nfqws.
 - Перезапуск nfqws
 - Настройка группы и токена telegramm
-- Полная переустановка nfqws.
   <p align="left">
   <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png" target="_blank" rel="noopener noreferrer">
     <picture>
@@ -34,7 +33,9 @@
     </picture>
   </a>
 </p>
-- Отправка уведомлений в telegram об успешном обновлении user.list и служб nfqws ###(Для уведомлений нужно созадать бота в телеграмм);
+
+### Отправка уведолений в telegram, возможна при наличии бота и группы.
+
   <p align="left">
   <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/tg.png" target="_blank" rel="noopener noreferrer">
     <picture>
