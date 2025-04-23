@@ -287,13 +287,13 @@ source "/opt/usr/bin/nfqws_var"
                     8) day_name="Ежедневно" ;;
                 esac
                 eval "${time_var}='$cron_expression'"
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-nfqws" > "${initd_crontab}" 
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-update-userlist" > "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}"  
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
 				echo "$RoutID: Служба Cron перезапущена";
 				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	            sendTelegram "$RoutID: Время автоматического обновления NFQWS $day_name в $formatted_hour:$formatted_minute";
+	            sendTelegram "$RoutID: Время автоматического обновления NFQWS и userlist $day_name в $formatted_hour:$formatted_minute";
 				sleep 5s ;
 				sendTelegram "$RoutID: Служба Cron перезапущена";
 				fi
@@ -339,7 +339,7 @@ source "/opt/usr/bin/nfqws_var"
             done
 
             if [ "$day_choice" -eq 0 ]; then
-                echo -e "  Время автоматичечкого обновления не выбрано."
+                echo -e "  Время автоматического обновления не выбрано."
             else
                 if [ "$day_choice" -eq 8 ]; then
                     echo
@@ -401,13 +401,13 @@ source "/opt/usr/bin/nfqws_var"
                     8) day_name="Ежедневно" ;;
                 esac
                 eval "${time_var}='$cron_expression'"
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-nfqws" > "${initd_crontab}" 
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-update-userlist" > "${initd_crontab}" 
+                echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
 				echo "$RoutID: Служба Cron перезапущена";
 				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	            sendTelegram "$RoutID: Время автоматического обновления NFQWS $day_name в $formatted_hour:$formatted_minute";
+	            sendTelegram "$RoutID: Время автоматического обновления NFQWS и userlist $day_name в $formatted_hour:$formatted_minute";
 				sleep 5s ;
 				sendTelegram "$RoutID: Служба Cron перезапущена";
 				fi
@@ -596,9 +596,13 @@ ndmc -c dns-proxy tls upstream 217.160.70.42 sni ns1.opennameserver.org
 ndmc -c system configuration save
 ndmc -c dns-proxy tls upstream 213.202.211.221 sni ns2.opennameserver.org
 ndmc -c system configuration save
+ndmc -c dns-proxy tls upstream 185.222.222.222 sni dot.sb
+ndmc -c system configuration save
 ndmc -c dns-proxy tls upstream 81.169.136.222 sni ns3.opennameserver.org
 ndmc -c system configuration save
 ndmc -c dns-proxy tls upstream 185.181.61.24 sni ns4.opennameserver.org
+ndmc -c system configuration save
+ndmc -c dns-proxy tls upstream 45.11.45.11 sni dot.sb
 ndmc -c system configuration save
 echo "Добавление DOH"
 dns-proxy https upstream https://ns1.opennameserver.org/dns-query
@@ -608,6 +612,8 @@ ndmc -c system configuration save
 ndmc -c dns-proxy https upstream https://ns3.opennameserver.org/dns-query
 ndmc -c system configuration save
 ndmc -c dns-proxy https upstream https://ns4.opennameserver.org/dns-query
+ndmc -c system configuration save
+ndmc -c dns-proxy https upstream https://doh.dns.sb/dns-query dnsm
 ndmc -c system configuration save
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 sendTelegram "$RoutID: DNS записи и политика добавлены";
@@ -646,10 +652,20 @@ case "$1" in
 	-install-nfqws)
     InstallNFQWS
 	;;
+	-time-update)
+   conf_choose_cron_time
+	;;
 	*)
 	green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
-echo -e "Доступные команды:$1 \n${green}-menu${reset} - Главное меню\n${green}-update-userlist${reset} - Обновление userlist\n${green}-update-nfqws${reset} - Обновление nfqws\n${green}-token${reset} - Настройка телеграмма\n${green}-restart-nfqws${reset} - Перезагрузка nfqws\n${green}-remove-nfqws${reset} - Удаление nfqws\n${green}-install-nfqws${reset} - Установка nfqws"
+echo -e "Доступные команды:$1 \n${green}-menu${reset} - Главное меню
+${green}-update-userlist${reset} - Обновление userlist
+${green}-update-nfqws${reset} - Обновление nfqws
+${green}-token${reset} - Настройка телеграма
+${green}-restart-nfqws${reset} - Перезагрузка nfqws
+${green}-remove-nfqws${reset} - Удаление nfqws
+${green}-install-nfqws${reset} - Установка nfqws
+${green}-time-update${reset} - Установка даты и время проверки обновлений nfqws и userlist"
 esac
