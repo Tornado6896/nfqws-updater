@@ -87,10 +87,10 @@ Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
      echo "$RoutID: Служба Nfqws обновлена $Ver3. Служба Nfqws-web обновлена $VerWeb2";
      if [ -n "$tgToken" -a -n "$tgChatId" ]; then
       sendTelegram "$RoutID: Служба Nfqws обновлена $Ver3. Служба Nfqws-web обновлена $VerWeb2";
-	  sleep 10s 
+	  sleep 5s 
 	  sendTelegram "$RoutID: Служба Nfqws перезапущена";
 	  fi
-	  sleep 10s 
+	  sleep 5s 
      /opt/etc/init.d/S51nfqws restart
 	 echo "$RoutID: Служба Nfqws перезапущена";
 	
@@ -120,7 +120,7 @@ echo "Обновление UserList"
 	  sendTelegram "$RoutID: user.list успешно обновлен, добавлено новых записей $count3";
     chown nobody:nobody "$listLocal"
     chmod 644 "$listLocal"
-	sleep 10s 
+	sleep 5s 
     /opt/etc/init.d/S51nfqws restart
 	echo "$RoutID: Служба Nfqws перезапущена";
 	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
@@ -293,7 +293,7 @@ source "/opt/usr/bin/nfqws_var"
 				echo "$RoutID: Служба Cron перезапущена";
 				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 	            sendTelegram "$RoutID: Время автоматического обновления NFQWS $day_name в $formatted_hour:$formatted_minute";
-				sleep 10s ;
+				sleep 5s ;
 				sendTelegram "$RoutID: Служба Cron перезапущена";
 				fi
 				fi
@@ -406,7 +406,7 @@ source "/opt/usr/bin/nfqws_var"
 				echo "$RoutID: Служба Cron перезапущена";
 				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 	            sendTelegram "$RoutID: Время автоматического обновления NFQWS $day_name в $formatted_hour:$formatted_minute";
-				sleep 10s ;
+				sleep 5s ;
 				sendTelegram "$RoutID: Служба Cron перезапущена";
 				fi
 				fi
@@ -451,12 +451,11 @@ source "/opt/usr/bin/nfqws_var"
 	  fi
     chown nobody:nobody "$listLocal"
     chmod 644 "$listLocal"
-	sleep 10s 
+	sleep 5s 
     /opt/etc/init.d/S51nfqws restart
 	echo "$RoutID: Служба Nfqws перезапущена";
 	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Служба Nfqws перезапущена";
-	sleep 10s ;
+	sleep 5s ;
 	sendTelegram "$RoutID: Служба Nfqws перезапущена";
 	fi
 	  else
