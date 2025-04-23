@@ -287,7 +287,8 @@ source "/opt/usr/bin/nfqws_var"
                     8) day_name="Ежедневно" ;;
                 esac
                 eval "${time_var}='$cron_expression'"
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater" > "${initd_crontab}" 
+				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-nfqws" > "${initd_crontab}" 
+				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-update-userlist" > "${initd_crontab}" 
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
 				echo "$RoutID: Служба Cron перезапущена";
@@ -400,7 +401,8 @@ source "/opt/usr/bin/nfqws_var"
                     8) day_name="Ежедневно" ;;
                 esac
                 eval "${time_var}='$cron_expression'"
-				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater" > "${initd_crontab}" 
+				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-nfqws" > "${initd_crontab}" 
+				echo -e "${cron_expression} /opt/usr/bin/nfqws_updater -update-update-userlist" > "${initd_crontab}" 
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
 				echo "$RoutID: Служба Cron перезапущена";
