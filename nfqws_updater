@@ -287,7 +287,7 @@ source "/opt/usr/bin/nfqws_var"
                     8) day_name="Ежедневно" ;;
                 esac
                 eval "${time_var}='$cron_expression'"
-				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
 				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}"  
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
@@ -402,7 +402,7 @@ source "/opt/usr/bin/nfqws_var"
                 esac
                 eval "${time_var}='$cron_expression'"
                 echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-nfqws" > "${initd_crontab}" 
 				echo -e "  Время автоматического обновления ${yellow} NFQWS ${reset}: $day_name в $formatted_hour:$formatted_minute"
 				/opt/etc/init.d/S05crond restart;
 				echo "$RoutID: Служба Cron перезапущена";
@@ -634,7 +634,7 @@ green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
-echo -e "Доступные команды:$1 \n${green}-menu${reset} - Главное меню
+echo -e "Доступные команды для nfqws_updater:$1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
 ${green}-update-nfqws${reset} - Обновление nfqws
 ${green}-token${reset} - Настройка телеграма
