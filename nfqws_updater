@@ -73,10 +73,11 @@ function sendTelegram {
   local tgCmdArgs="parse_mode=HTML&chat_id=$tgChatId&disable_web_page_preview=1&text=$tgText"
   tgCmd=$(curl --max-time $tgTimeout -d "$tgCmdArgs" $tgUrl -s)
   if [ $? -gt 0 ]; then echo "Failed sending Telegram"; else echo "Sending message Telegram Successfully!"; fi
- 
+
 }
 function UpdateNFQWS {
 echo "Обновление NFQWS"
+source "/opt/usr/bin/nfqws_var"
 if  [ "$Ver" != "$Ver2" ]; then
 opkg update
 opkg upgrade nfqws-keenetic
@@ -102,7 +103,7 @@ else
   menu
 }
 function UpdateUserList {
-
+source "/opt/usr/bin/nfqws_var"
 echo "Обновление UserList"
   local tsRemote=$(curl -sIkL --connect-timeout 5 "$urlList" | grep -i 'Content-Length' | tail -n 1 | sed 's|Content-Length: ||g')
   local tslocal=$(wc -c /opt/etc/nfqws/user.list | awk '{print $1}')
@@ -187,6 +188,7 @@ fi
 fi	
 }
 function choose_cron_time {
+source "/opt/usr/bin/nfqws_var"
         task_var="chose_${task}_cron_select"
         time_var="chose_${task}_cron_time"
 		task="taskuserlist"
@@ -299,6 +301,7 @@ function choose_cron_time {
 
 }
 function conf_choose_cron_time {
+source "/opt/usr/bin/nfqws_var"
         task_var="chose_${task}_cron_select"
         time_var="chose_${task}_cron_time"
 		task="taskuserlist"
@@ -411,6 +414,7 @@ function conf_choose_cron_time {
 menu
 }
 function InstallNFQWS {
+source "/opt/usr/bin/nfqws_var"
 echo "Установка NFQWS"
 opkg update
 opkg install ca-certificates wget-ssl
@@ -429,7 +433,7 @@ fi
 }
 function InstallUserList {
 echo "Установка UserList"
-
+source "/opt/usr/bin/nfqws_var"
   local tsRemote=$(curl -sIkL --connect-timeout 5 "$urlList" | grep -i 'Content-Length' | tail -n 1 | sed 's|Content-Length: ||g')
   local tslocal=$(wc -c /opt/etc/nfqws/user.list | awk '{print $1}')
   if [ "$tslocal" -ne "$tsRemote" ]; then
@@ -620,9 +624,31 @@ dns_add;
 choose_cron_time;
 }
 case "$1" in
-  menu)
+    -menu)
     menu
 	;;
+	-update-nfqws)
+    UpdateNFQWS
+	;;
+	-update-userlist)
+    UpdateUserList
+	;;
+	-token)
+    config_Token
+	;;
+	-remove-nfqws)
+    remove_nfqws
+	;;
+	-restart-nfqws)
+    restart_nfqws
+	;;
+	-install-nfqws)
+    InstallNFQWS
+	;;
 	*)
-echo "Для настройки исползуйте:$1{menu}"
+	green="\033[32m"
+red="\033[31m"
+yellow="\033[33m"
+reset="\033[0m" 
+echo -e "Доступные команды:$1 \n${green}-menu${reset} - Главное меню\n${green}-update-userlist${reset} - Обновление userlist\n${green}-update-nfqws${reset} - Обновление nfqws\n${green}-token${reset} - Настройка телеграмма\n${green}-restart-nfqws${reset} - Перезагрузка nfqws\n${green}-remove-nfqws${reset} - Удаление nfqws\n${green}-install-nfqws${reset} - Установка nfqws"
 esac
