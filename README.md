@@ -24,7 +24,7 @@
 - Обновлнеие user list;
 - Обновление nfqws.
 - Перезапуск nfqws
-- Настройка группы и токена telegramm
+- Настройка группы и токена telegram         
   <p align="left">
   <a href="https://github.com/Tornado6896/nfqws-updater/blob/main/nfqws_menu.png" target="_blank" rel="noopener noreferrer">
     <picture>
