@@ -7,49 +7,83 @@ Ver2="$(curl -ss https://anonym-tsk.github.io/nfqws-keenetic/all/Packages | grep
 urlList="https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/user.lst"
 confDirNfqws="/opt/etc/nfqws"
 listLocal="$confDirNfqws/user.list"
-
-#Переменные
+source "/opt/usr/bin/nfqws_var"
 RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
 green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
+
 # Функции
+function sendTelegram {
+  local tgUrl="https://api.telegram.org/bot$tgToken/sendMessage"
+  local tgTimeout="10"
+  local tgText="$@"
+  local tgCmdArgs="parse_mode=HTML&chat_id=$tgChatId&disable_web_page_preview=1&text=$tgText"
+  tgCmd=$(curl --max-time $tgTimeout -d "$tgCmdArgs" $tgUrl -s)
+  if [ $? -gt 0 ]; then echo "Ошибка оправки в Telegram"; else echo "Сообщение успешно отправлено в Telegram!"; fi
 
-function config_Token {
-
-echo Укажите Ваш tgToken:
-read tgToken
-echo -e "Ваш токен: $tgToken"
-echo Укажите Ваш tgChatId:
-read tgChatId
-echo -e "Ваш чат: $tgChatId"
-initd_file="/opt/usr/bin/nfqws_var"
-script_content='#!/bin/sh 
-tgToken="'${tgToken}'"
-tgChatId="'${tgChatId}'"
-'
-echo -e "Файл ${green}nfqws_var${reset} создан"	
-        echo -e "${script_content}" > "${initd_file}" 
-        chmod +x "${initd_file}"
-		source "/opt/usr/bin/nfqws_var"
-		menu
 }
-function restart_nfqws {
-
+function sendupdatenfqws {
+VerWeb2="$(opkg info nfqws-keenetic-web | grep "Version")"
+Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
+ echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} обновлена $Ver3. Служба ${green}nfqws-web${reset} обновлена $VerWeb2";
+     if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+      sendTelegram "$RoutID: Служба nfqws обновлена $Ver3. Служба nfqws-web обновлена $VerWeb2";
+	  restartnfqws
+	  fi
+	  }
+function sendinstallnfqws {
+VerWeb2="$(opkg info nfqws-keenetic-web | grep "Version")"
+Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
+ echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} установлена $Ver3. Служба ${green}nfqws-web${reset} установлена $VerWeb2";
+     if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+      sendTelegram "$RoutID: Служба nfqws установлена $Ver3. Служба nfqws-web установлена $VerWeb2";
+	  restartnfqws
+	  fi
+	  }
+function sendupdatenfqwsno {
+echo -e "${red}$RoutID${reset}: Обновлений ${red}nfqws${reset} нет";
+	 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+	sendTelegram "$RoutID: Обновлений nfqws нет";
+  fi
+}
+function sendupdateuserlist {
+echo -e "${red}$RoutID${reset}: userlist успешно добавлен, новых записей $count3";
+	  if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+	  sendTelegram "$RoutID: userlist успешно добавлен, добавлено новых записей $count3";
+	  fi
+}
+function sendupdateuserlistno {
+ echo -e "${red}$RoutID${reset}:Обновления ${red}userlist${reset} отсутствуют";
+	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+	sendTelegram "$RoutID: Обновления userlist отсутствуют";
+	fi
+}
+function restartnfqws {
+echo -e "Переагрузка ${green}nfqws${reset}"
 /opt/etc/init.d/S51nfqws restart
-
-menu
-
+echo -e "${yellow}$RoutID${reset}: Служба ${yellow}nfqws${reset} перезапущена";
+if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+	sendTelegram "$RoutID: Служба nfqws перезапущена";
+	fi
 }
-function remove_nfqws {
+function restartcron {
+echo -e "Переагрузка ${green}cron${reset}"
+/opt/etc/init.d/S05crond restart;
+echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
+if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+sendTelegram "$RoutID: Служба cron перезапущена";
+fi
+}
+function removenfqws {
+echo -e "Удаление ${green}nfqws${reset}"
 opkg remove --autoremove nfqws-keenetic-web nfqws-keenetic
 rm -r /opt/var/spool/cron/crontabs
 rm -r /opt/usr/bin/nfqws_var
-menu
 }
-function add_Token {
-
+function token {
+echo -e "Настройка отправки уведомлений в ${green}Telegram${reset}"
 echo Укажите Ваш tgToken:
 read tgToken
 echo -e "Ваш токен: $tgToken"
@@ -64,95 +98,42 @@ tgChatId="'${tgChatId}'"
         echo -e "Файл ${green}nfqws_var${reset} создан"		
         echo -e "${script_content}" > "${initd_file}" 
         chmod +x "${initd_file}"
-		source "/opt/usr/bin/nfqws_var"
+		#source "/opt/usr/bin/nfqws_var"
 }
-function sendTelegram {
-  local tgUrl="https://api.telegram.org/bot$tgToken/sendMessage"
-  local tgTimeout="10"
-  local tgText="$@"
-  local tgCmdArgs="parse_mode=HTML&chat_id=$tgChatId&disable_web_page_preview=1&text=$tgText"
-  tgCmd=$(curl --max-time $tgTimeout -d "$tgCmdArgs" $tgUrl -s)
-  if [ $? -gt 0 ]; then echo "Ошибка оправки в Telegram"; else echo "Сообщение успешно отправлено в Telegram!"; fi
-
-}
-function UpdateNFQWS {
+function updatenfqws {
+echo -e "Обновление ${green}nfqws${reset}"
 echo -e "Файл ${green}nfqws_var${reset} создан"	
-source "/opt/usr/bin/nfqws_var"
 if  [ "$Ver" != "$Ver2" ]; then
 opkg update
 opkg upgrade nfqws-keenetic
 opkg upgrade nfqws-keenetic-web
-VerWeb2="$(opkg info nfqws-keenetic-web | grep "Version")"
-Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
-     echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} обновлена $Ver3. Служба ${green}nfqws-web${reset} обновлена $VerWeb2";
-     if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-      sendTelegram "$RoutID: Служба nfqws обновлена $Ver3. Служба nfqws-web обновлена $VerWeb2";
-	  sleep 5s 
-	  sendTelegram "$RoutID: Служба nfqws перезапущена";
-	  fi
-	  sleep 5s 
-     /opt/etc/init.d/S51nfqws restart
-	 echo -e "${yellow}$RoutID${reset}: Служба ${yellow}nfqws${reset} перезапущена";
-	
+
+      sendupdatenfqws
 else
-	echo -e "${red}$RoutID${reset}: Обновлений ${red}nfqws${reset} нет";
-	 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Обновлений nfqws нет";
+	sendupdatenfqwsno
   fi
-  fi
-  menu
-}
-function UpdateUserList {
-source "/opt/usr/bin/nfqws_var"
-echo -e "Обновление ${green}userlist${reset}"
-  local tsRemote=$(curl -sIkL --connect-timeout 5 "$urlList" | grep -i 'Content-Length' | tail -n 1 | sed 's|Content-Length: ||g')
-  local tslocal=$(wc -c /opt/etc/nfqws/user.list | awk '{print $1}')
-  [ -z "$tsRemote" ] && echo "Не удалось получаить обновление." && exit 1
-  if [ "$tslocal" -ne "$tsRemote" ]; then
-    local count1="$(wc /opt/etc/nfqws/user.list | awk '{print $1}')"
-    rm -f "$listLocal"
-	curl --connect-timeout 10 -fkSL# "$urlList" > "$listLocal"
-	   count2="$(wc /opt/etc/nfqws/user.list | awk '{print $1}')"
-	   echo "$count2"
-	   echo "$count1"
-	   count3=$((count2 - count1))
-	  echo -e "${green}$RoutID${reset}: ${green}userlist${reset} успешно обновлен, добавлено новых записей $count3";
-	  sendTelegram "$RoutID$: userlist успешно обновлен, добавлено новых записей $count3";
-    chown nobody:nobody "$listLocal"
-    chmod 644 "$listLocal"
-	sleep 5s 
-    /opt/etc/init.d/S51nfqws restart
-	echo -e "${yellow}$RoutID${reset}: Служба ${yellow}nfqws{reset} перезапущена";
-	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Служба nfqws перезапущена";
-	fi
-  else
-    
-    echo -e "${red}$RoutID${reset}:Обновления ${red}userlist${reset} отсутствуют";
-	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID:Обновления userlist отсутствуют";
-	fi
-  fi
-  menu
 }
 function menu {
- 
+            echo
+            echo -e "     Главное меню ${green}nfqws-updater${reset}"
             echo
             echo -e "     Выберите пункт:"
             echo -e "     1. Выполнить полную установку ${green}nfqws${reset}"
-            echo -e "     2. Изменить данные ${green}telegram${reset}"
-            echo -e "     3. Выполниить обновление ${green}nfqws${reset}"
-			echo -e "     4. Выполниить обновление ${green}userlist${reset}"
-            echo -e "     5. Выбрать время обновлений ${green}nfqws и userlist${reset}"
-			echo -e "     6. Перезагрузить ${green}nfqws${reset}"
-			echo -e "     7. Удалить ${green}nfqws${reset}"
-			echo -e "     8. Выход"
+			echo -e "     2. Выполнить установку ${green}nfqws${reset}"
+			echo -e "     3. Выполниить обновление ${green}nfqws${reset}"
+			echo -e "     4. Перезагрузить ${green}nfqws${reset}"
+			echo -e "     5. Удалить ${green}nfqws${reset}"
+			echo -e "     6. Перезагрузить ${green}cron${reset}"
+			echo -e "     7. Выполниить обновление ${green}userlist${reset}"
+			echo -e "     8. Выбрать время обновлений ${green}nfqws и userlist${reset}"
+            echo -e "     9. Изменить данные ${green}telegram${reset}"
+            echo -e "     0. Выход"
             echo -e 
 
             local choice
             while true; do
                 read -p "  Ваш выбор: " choice
-                if [[ "$choice" =~ ^[1-8]$ ]]; then
+                if [[ "$choice" =~ ^[0-8]$ ]]; then
                     break
                 else
                     echo -e "  Некорректный номер действия. Пожалуйста,выберите снова"
@@ -160,48 +141,55 @@ function menu {
             done
 
             if [ "$choice" -eq 1 ]; then  
-            install_full 
-fi			
-              if [ "$choice" -eq 2 ]; then         
-            config_Token
-fi
+            installfull
+            menu			
+			fi			
+            if [ "$choice" -eq 2 ]; then         
+            installnfqws
+			menu
+			fi
 			if [ "$choice" -eq 3 ]; then         
-            UpdateNFQWS 
+            updatenfqws
+            menu			
 			fi
 			if [ "$choice" -eq 4 ]; then            
-            UpdateUserList
+            restartnfqws
+			menu
 			fi
 			if [ "$choice" -eq 5 ]; then
-			conf_choose_cron_time
-				
-             fi	
+			removenfqws
+			menu	
+            fi	
 			if [ "$choice" -eq 6 ]; then
-			restart_nfqws
+			restartcron
+			menu
 			fi
-		
 		    if [ "$choice" -eq 7 ]; then
-			remove_nfqws
+			userlist
+			menu
 			fi
 			if [ "$choice" -eq 8 ]; then
+			crontime
+			menu
+			fi
+			if [ "$choice" -eq 9 ]; then
+			token
+			menu
+			fi
+			if [ "$choice" -eq 0 ]; then
 			exit 0
 				
-fi	
+fi
+
 }
-function choose_cron_time {
-source "/opt/usr/bin/nfqws_var"
-        task_var="chose_${task}_cron_select"
-        time_var="chose_${task}_cron_time"
-		task="taskuserlist"
+function crontime {
+       
 		local init_back="/opt/backups/"
         local initd_crontab="/opt/var/spool/cron/crontabs/root"
+echo -e "Установка автоматического обновления ${green}nfqws и userlist${reset}"
+
 		
-        if [ "$(eval echo \${$task_var})" != true ]; then
-            echo
-            if [ "$task" = "taskuserlist" ]; then
-                 echo -e "  Время автоматического обновления ${yellow}nfqws и userlist${reset}:"
-            else
-                 echo -e "  Время автоматического обновления не выбрано."
-            fi
+        
             echo
             echo "     Выберите день"
             echo "     0. Отмена"
@@ -287,7 +275,7 @@ source "/opt/usr/bin/nfqws_var"
                     7) day_name="Воскресенье" ;;
                     8) day_name="Ежедневно" ;;
                 esac
-                eval "${time_var}='$cron_expression'"
+                
 				if [ -s "$initd_crontab" ]; then
 			   cron_file=""
 			   local cron_file
@@ -304,238 +292,40 @@ source "/opt/usr/bin/nfqws_var"
                 else
                     echo -e "${red}Некорректный номер действия.${reset} Пожалуйста, выберите снова"
 					fi
-					
             done
-		
 			if [ "$cron_file" -eq 1 ]; then  
-			   
 				mkdir -p "$init_back"
                 cp -a "$initd_crontab" "$init_back"
-                echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "  Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s;
 				echo -e "Резервная копия ${green}cron${reset} создана по пути ${green}$init_back${reset}"
+                sed -i "/nfqws_updater/d" /opt/var/spool/cron/crontabs/root
+				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
 				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
 				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
-				fi
+				restartcron
 				fi
 		        if [ "$cron_file" -eq 0 ]; then 
-		        echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
+				sed -i "/nfqws_updater/d" /opt/var/spool/cron/crontabs/root
+		        echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
 				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "  Время автоматического обновления ${yellow}nfqws${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-			     
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s ;
 				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
 				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
-					fi
-					fi
-					else
-				echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s ;
-				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
+				restartcron
 				fi
+				else
+				sed -i "/nfqws_updater/d" /opt/var/spool/cron/crontabs/root
+				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
+				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
+				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
+				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
+				restartcron
 					fi
 					
-					fi
-				
-        fi
-
-}
-function conf_choose_cron_time {
-source "/opt/usr/bin/nfqws_var"
-        task_var="chose_${task}_cron_select"
-        time_var="chose_${task}_cron_time"
-		task="taskuserlist"
-		local init_back="/opt/backups/"
-        local initd_crontab="/opt/var/spool/cron/crontabs/root"
 		
-        if [ "$(eval echo \${$task_var})" != true ]; then
-            echo
-            if [ "$task" = "taskuserlist" ]; then
-                echo -e "  Время автоматического обновления ${yellow}nfqws и userlist${reset}:"
-            else
-                echo -e "  Время автоматического обновления ${yellow}$task${reset}:"
-            fi
-            echo
-            echo "  Выберите день"
-            echo "     0. Отмена"
-            echo "     1. Понедельник"
-            echo "     2. Вторник"
-            echo "     3. Среда"
-            echo "     4. Четверг"
-            echo "     5. Пятница"
-            echo "     6. Суббота"
-            echo "     7. Воскресенье"
-            echo "     8. Ежедневно"
-            echo
-
-            local day_choice
-            while true; do
-                read -p "  Ваш выбор: " day_choice
-                if [[ "$day_choice" =~ ^[0-8]$ ]]; then
-                    break
-                else
-                    echo -e "  ${red}Некорректный номер действия.${reset} Пожалуйста, выберите снова"
-                fi
-            done
-
-            if [ "$day_choice" -eq 0 ]; then
-                echo -e "  Время автоматического обновления не выбрано."
-            else
-                if [ "$day_choice" -eq 8 ]; then
-                    echo
-                    read -p "  Выберите час (0-23): " hour
-                    while [[ ! "$hour" =~ ^[0-9]+$ || "$hour" -lt 0 || "$hour" -gt 23 ]]; do
-                        echo -e "  ${red}Некорректный час.${reset} Пожалуйста, попробуйте снова"
-                        read -p "  Введите значение от 0 до 23: " hour
-                    done
-
-                    read -p "  Выберите минуту (0-59): " minute
-                    while [[ ! "$minute" =~ ^[0-9]+$ || "$minute" -lt 0 || "$minute" -gt 59 ]]; do
-                        echo -e "  ${red}Некорректные минуты.${reset} Пожалуйста, попробуйте снова"
-                        read -p "  Введите значение от 0 до 59: " minute
-                    done
-
-                    cron_expression="$minute $hour * * *"
-                    cron_display="$minute $hour * * *"
-                else
-                    echo
-                    read -p "  Выберите час (0-23): " hour
-                    while [[ ! "$hour" =~ ^[0-9]+$ || "$hour" -lt 0 || "$hour" -gt 23 ]]; do
-                        echo -e "  ${red}Некорректный час.${reset} Пожалуйста, попробуйте снова"
-                        read -p "  Введите значение от 0 до 23: " hour
-                    done
-
-                    read -p "  Выберите минуту (0-59): " minute
-                    while [[ ! "$minute" =~ ^[0-9]+$ || "$minute" -lt 0 || "$minute" -gt 59 ]]; do
-                        echo -e "  ${red}Некорректные минуты.${reset} Пожалуйста, попробуйте снова"
-                        read -p "  Введите значение от 0 до 59: " minute
-                    done
-
-                    case "$day_choice" in
-                        1) day_of_week="1" ;;
-                        2) day_of_week="2" ;;
-                        3) day_of_week="3" ;;
-                        4) day_of_week="4" ;;
-                        5) day_of_week="5" ;;
-                        6) day_of_week="6" ;;
-                        7) day_of_week="0" ;;
-                    esac
-
-                    cron_expression="$minute $hour * * $day_of_week"
-                    cron_display="$minute $hour * * $day_of_week"
-                fi
-
-                formatted_hour=$(printf "%02d" "$hour")
-                formatted_minute=$(printf "%02d" "$minute")
-
-                day_name=""
-                case "$day_choice" in
-                    0) day_name="Отмена" ;;
-                    1) day_name="Понедельник" ;;
-                    2) day_name="Вторник" ;;
-                    3) day_name="Среда" ;;
-                    4) day_name="Четверг" ;;
-                    5) day_name="Пятница" ;;
-                    6) day_name="Суббота" ;;
-                    7) day_name="Воскресенье" ;;
-                    8) day_name="Ежедневно" ;;
-                esac
-                eval "${time_var}='$cron_expression'"
-				
-				if [ -s "$initd_crontab" ]; then
-			   cron_file=""
-			   local cron_file
-               echo -e "Файл ${yellow}cron${reset} существует сделать резервную копию?"
-               echo -e "     1. Да"
-               echo -e "     0. Нет"
-			   
-				
-             while true; do
-                read -p "  Ваш выбор: " cron_file
-				
-                if [[ "$cron_file" =~ ^[0-1]$ ]]; then
-                    break
-                else
-                    echo -e "${red}Некорректный номер действия.${reset} Пожалуйста, выберите снова"
-					fi
-					
-            done
-		
-			if [ "$cron_file" -eq 1 ]; then  
-			   
-				mkdir -p "$init_back"
-                cp -a "$initd_crontab" "$init_back"
-                echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s ;
-				echo -e "Резервная копия ${green}cron${reset} создана по пути ${green}$init_back${reset}"
-				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
-				fi
-				fi
-		        if [ "$cron_file" -eq 0 ]; then 
-		        echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "  Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-			     
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s ;
-				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
-					fi
-					fi
-					else
-				echo -e "${cron_expression} nfqws_updater -update-userlist" > "${initd_crontab}" 
-				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
-				echo -e "Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute"
-				/opt/etc/init.d/S05crond restart;
-				echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
-				 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-				sendTelegram "$RoutID: Служба cron перезапущена";
-				sleep 5s ;
-				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow}nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
-				fi
-					fi
-					
-					fi
-				
-        fi
-				
-				
-			
-    
         
-		
-menu
+fi
 }
-function InstallNFQWS {
-source "/opt/usr/bin/nfqws_var"
+function installnfqws {
 echo -e "Установка ${green}nfqws${reset}"
 opkg update
 opkg install ca-certificates wget-ssl
@@ -545,49 +335,29 @@ echo "src/gz nfqws-keenetic https://anonym-tsk.github.io/nfqws-keenetic/all" > /
 opkg update
 opkg install nfqws-keenetic
 opkg install nfqws-keenetic-web
-VerWeb="$(opkg info nfqws-keenetic-web | grep "Version")"
-Ver="$(opkg info nfqws-keenetic | grep "Version:")"
-echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} установлена $Ver. Служба ${green}nfqws-web${reset} установлена $VerWeb";
- if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: Служба nfqws установлена $Ver. Служба nfqws-web установлена $VerWeb";
-fi
+sendinstallnfqws
 }
-function InstallUserList {
-echo -e "Установка ${green}userlist${reset}"
-source "/opt/usr/bin/nfqws_var"
+function userlist {
+echo -e "Добавление ${green}userlist${reset}"
   local tsRemote=$(curl -sIkL --connect-timeout 5 "$urlList" | grep -i 'Content-Length' | tail -n 1 | sed 's|Content-Length: ||g')
   local tslocal=$(wc -c /opt/etc/nfqws/user.list | awk '{print $1}')
   if [ "$tslocal" -ne "$tsRemote" ]; then
     local count1="$(wc /opt/etc/nfqws/user.list | awk '{print $1}')"
     rm -f "$listLocal"
 	curl --connect-timeout 10 -fkSL# "$urlList" > "$listLocal"
-  
 	   count2="$(wc /opt/etc/nfqws/user.list | awk '{print $1}')"
 	   echo "$count2"
 	   echo "$count1"
 	   count3=$((count2 - count1))
-	  echo -e "${red}$RoutID${reset}: user.list успешно установлен, добавлено новых записей $count3";
-	  if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	  sendTelegram "$RoutID: userlist успешно установлен, добавлено новых записей $count3";
-	  fi
     chown nobody:nobody "$listLocal"
     chmod 644 "$listLocal"
-	sleep 5s 
-    /opt/etc/init.d/S51nfqws restart
-	echo -e "${yellow}$RoutID${reset}: Служба ${yellow}nfqws${reset} перезапущена";
-	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sleep 5s ;
-	sendTelegram "$RoutID: Служба nfqws перезапущена";
-	fi
+	sendupdateuserlist
 	  else
-    echo -e "${red}$RoutID${reset}:Обновления ${red}userlist${reset} отсутствуют";
-	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Обновления userlist отсутствуют";
-	fi
+    sendupdateuserlistno
   fi
   
 }
-function registerCron {
+function registercron {
     echo -e "Проверка наличия пакета ${green}cron${reset}"
 	# Проверка наличия пакета cron
     if opkg list-installed | grep -q cron; then
@@ -706,7 +476,7 @@ else
 echo -e "Файл ${yellow}crontab${reset} уже существет";
 fi
 }
-function dns_add {
+function dnsadd {
 echo -e "Добавление политики ${green}nfqws${reset}"
 ndmc -c ip policy Policy0 
 ndmc -c ip policy Policy0 description nfqws
@@ -740,20 +510,15 @@ if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 sendTelegram "$RoutID: DNS записи и политика nfqws добавлены";
 fi
 }
-function install_full {
-add_Token; 
-InstallNFQWS;
-InstallUserList;
+function installfull {
+token; 
+installnfqws;
+userlist;
 rm -r /opt/root/_i.sh
-sleep 5s
-registerCron;
+registercron;
 crontabs;
-dns_add;
-choose_cron_time;
-green="\033[32m"
-red="\033[31m"
-yellow="\033[33m"
-reset="\033[0m" 
+dnsadd;
+crontime;
 echo -e "Доступные команды для ${green}nfqws_updater${reset} $1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
 ${green}-update-nfqws${reset} - Обновление nfqws
@@ -768,34 +533,34 @@ case "$1" in
     menu
 	;;
 	-update-nfqws)
-    UpdateNFQWS
+    updatenfqws
 	;;
 	-update-userlist)
-    UpdateUserList
+    userlist
 	;;
 	-token)
-    config_Token
+    token
 	;;
 	-remove-nfqws)
-    remove_nfqws
+    removenfqws
 	;;
 	-restart-nfqws)
-    restart_nfqws
+    restartnfqws
 	;;
 	-install-nfqws)
-    InstallNFQWS
+    installnfqws
 	;;
 	-install-nfqws-full)
-    install_full
+    installfull
 	;;
 	-time-update)
-   conf_choose_cron_time
+    crontime
+	;;
+	-restart-cron)
+    restartcron
 	;;
 	*)
-	green="\033[32m"
-red="\033[31m"
-yellow="\033[33m"
-reset="\033[0m" 
+
 echo -e "Доступные команды для ${green}nfqws_updater${reset} $1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
 ${green}-update-nfqws${reset} - Обновление nfqws
@@ -803,6 +568,7 @@ ${green}-token${reset} - Настройка телеграма
 ${green}-restart-nfqws${reset} - Перезагрузка nfqws
 ${green}-remove-nfqws${reset} - Удаление nfqws
 ${green}-install-nfqws${reset} - Установка nfqws
+${green}-restart-cron${reset} - Перезагрузка cron
 ${green}-install-nfqws-full${reset} - Полная становка nfqws
 ${green}-time-update${reset} - Установка даты и время проверки обновлений nfqws и userlist"
 esac
