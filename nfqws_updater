@@ -7,7 +7,6 @@ Ver2="$(curl -ss https://anonym-tsk.github.io/nfqws-keenetic/all/Packages | grep
 urlList="https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/user.lst"
 confDirNfqws="/opt/etc/nfqws"
 listLocal="$confDirNfqws/user.list"
-source "/opt/usr/bin/nfqws_var"
 RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
 green="\033[32m"
 red="\033[31m"
@@ -98,7 +97,7 @@ tgChatId="'${tgChatId}'"
         echo -e "Файл ${green}nfqws_var${reset} создан"		
         echo -e "${script_content}" > "${initd_file}" 
         chmod +x "${initd_file}"
-		#source "/opt/usr/bin/nfqws_var"
+		source "/opt/usr/bin/nfqws_var"
 }
 function updatenfqws {
 echo -e "Обновление ${green}nfqws${reset}"
