@@ -2,12 +2,6 @@
 
 #Переменные
 RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
-Ver="$(opkg info nfqws-keenetic | grep "Version:")"
-Ver2="$(curl -ss https://anonym-tsk.github.io/nfqws-keenetic/all/Packages | grep  -m1 -w -e "nfqws-keenetic-web"  -e "Version")"
-urlList="https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/user.lst"
-confDirNfqws="/opt/etc/nfqws"
-listLocal="$confDirNfqws/user.list"
-RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
 green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
@@ -102,8 +96,10 @@ tgChatId="'${tgChatId}'"
 		source "/opt/usr/bin/nfqws_var"
 }
 function updatenfqws {
+Ver="$(opkg info nfqws-keenetic | grep "Version:")"
+Ver2="$(curl -ss https://anonym-tsk.github.io/nfqws-keenetic/all/Packages | grep  -m1 -w -e "nfqws-keenetic-web"  -e "Version")"
 echo -e "Обновление ${green}nfqws${reset}"
-echo -e "Файл ${green}nfqws_var${reset} создан"	
+
 if  [ "$Ver" != "$Ver2" ]; then
 opkg update
 opkg upgrade nfqws-keenetic
@@ -116,7 +112,7 @@ else
 }
 function menu {
             echo
-            echo -e "     Главное меню ${green}nfqws-updater v1.0.3${reset}"
+            echo -e "     Главное меню ${green}nfqws-updater v1.0.4${reset}"
             echo
             echo -e "     Выберите пункт:"
             echo -e "     1.  Выполнить полную установку ${green}nfqws${reset}"
@@ -132,7 +128,7 @@ function menu {
 			echo -e "     11. Выполниить обновление ${green}userlist${reset}"
 			echo -e "     12. Выбрать время обновлений ${green}nfqws и userlist${reset}"
             echo -e "     13. Изменить данные ${green}telegram${reset}"
-            echo -e "     0.  Выход"
+            echo -e "     00. Выход"
             echo -e 
 
             local choice
@@ -197,7 +193,7 @@ function menu {
 			token
 			menu
 			fi
-			if [ "$choice" -eq 0 ]; then
+			if [ "$choice" -eq 00 ]; then
 			exit 0
 				
 fi
@@ -359,6 +355,9 @@ opkg install nfqws-keenetic-web
 sendinstallnfqws
 }
 function userlist {
+urlList="https://raw.githubusercontent.com/Tornado6896/nfqws-updater/refs/heads/main/user.lst"
+confDirNfqws="/opt/etc/nfqws"
+listLocal="$confDirNfqws/user.list"
 echo -e "Добавление ${green}userlist${reset}"
   local tsRemote=$(curl -sIkL --connect-timeout 5 "$urlList" | grep -i 'Content-Length' | tail -n 1 | sed 's|Content-Length: ||g')
   local tslocal=$(wc -c /opt/etc/nfqws/user.list | awk '{print $1}')
@@ -492,7 +491,7 @@ echo -e "Файл ${red}crontab${reset} не найден"
 mkdir -p /opt/var/spool/cron/crontabs
 touch /opt/var/spool/cron/crontabs/root
 chmod +x "${initd_crontab}"
-echo -e "Файл ${green}crontab${reset} создан"	;
+echo -e "Файл ${green}crontab${reset} создан";
 else
 echo -e "Файл ${yellow}crontab${reset} уже существет";
 fi
@@ -502,7 +501,7 @@ echo -e "Добавление политики ${green}nfqws${reset}"
 ndmc -c ip policy Policy0 
 ndmc -c ip policy Policy0 description nfqws
 ndmc -c system configuration save
-sleep 5s
+sleep 10s
 echo -e "${green}$RoutID${reset}: политика ${green}nfqws${reset} добавлена";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 sendTelegram "$RoutID: политика nfqws добавлена";
@@ -573,7 +572,7 @@ ndmc -c system configuration save
 ndmc -c  interface GigabitEthernet0/Vlan3 no ipv6 name-servers auto
 ndmc -c system configuration save
 
-sleep 5s
+sleep 10s
 echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи добавлены";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
 sendTelegram "$RoutID: DNS записи добавлены";
