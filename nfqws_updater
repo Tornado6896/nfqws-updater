@@ -80,6 +80,8 @@ echo -e "Удаление ${green}nfqws${reset}"
 opkg remove --autoremove nfqws-keenetic-web nfqws-keenetic
 rm -r /opt/var/spool/cron/crontabs
 rm -r /opt/usr/bin/nfqws_var
+deldns
+delpolicy
 }
 function token {
 echo -e "Настройка отправки уведомлений в ${green}Telegram${reset}"
@@ -114,25 +116,29 @@ else
 }
 function menu {
             echo
-            echo -e "     Главное меню ${green}nfqws-updater${reset}"
+            echo -e "     Главное меню ${green}nfqws-updater v1.0.3${reset}"
             echo
             echo -e "     Выберите пункт:"
-            echo -e "     1. Выполнить полную установку ${green}nfqws${reset}"
-			echo -e "     2. Выполнить установку ${green}nfqws${reset}"
-			echo -e "     3. Выполниить обновление ${green}nfqws${reset}"
-			echo -e "     4. Перезагрузить ${green}nfqws${reset}"
-			echo -e "     5. Удалить ${green}nfqws${reset}"
-			echo -e "     6. Перезагрузить ${green}cron${reset}"
-			echo -e "     7. Выполниить обновление ${green}userlist${reset}"
-			echo -e "     8. Выбрать время обновлений ${green}nfqws и userlist${reset}"
-            echo -e "     9. Изменить данные ${green}telegram${reset}"
-            echo -e "     0. Выход"
+            echo -e "     1.  Выполнить полную установку ${green}nfqws${reset}"
+			echo -e "     2.  Выполнить установку ${green}nfqws${reset}"
+			echo -e "     3.  Выполниить обновление ${green}nfqws${reset}"
+			echo -e "     4.  Перезагрузить ${green}nfqws${reset}"
+			echo -e "     5.  Добавить ${green}DNS записи${reset}"
+			echo -e "     6.  Добавить ${green}политику nfqws${reset}"
+			echo -e "     7.  Удалить ${green}nfqws${reset}"
+			echo -e "     8.  Удалить ${green}DNS записи${reset}"
+			echo -e "     9.  Удалить ${green}политику nfqws${reset}"
+			echo -e "     10. Перезагрузить ${green}cron${reset}"
+			echo -e "     11. Выполниить обновление ${green}userlist${reset}"
+			echo -e "     12. Выбрать время обновлений ${green}nfqws и userlist${reset}"
+            echo -e "     13. Изменить данные ${green}telegram${reset}"
+            echo -e "     0.  Выход"
             echo -e 
 
             local choice
             while true; do
                 read -p "  Ваш выбор: " choice
-                if [[ "$choice" =~ ^[0-8]$ ]]; then
+                if [[ "$choice" =~ ^[0-9]$ || ^[0-9]+.*[0-9]$ ]]; then
                     break
                 else
                     echo -e "  Некорректный номер действия. Пожалуйста,выберите снова"
@@ -155,23 +161,39 @@ function menu {
             restartnfqws
 			menu
 			fi
-			if [ "$choice" -eq 5 ]; then
+			if [ "$choice" -eq 5 ]; then            
+            dnsadd
+			menu
+			fi
+			if [ "$choice" -eq 6 ]; then
+			addpolicy
+			menu	
+            fi	
+			if [ "$choice" -eq 7 ]; then
 			removenfqws
 			menu	
             fi	
-			if [ "$choice" -eq 6 ]; then
+			if [ "$choice" -eq 8 ]; then
+			deldns
+			menu	
+            fi
+			if [ "$choice" -eq 9 ]; then
+			delpolicy
+			menu
+			fi
+			if [ "$choice" -eq 10 ]; then
 			restartcron
 			menu
 			fi
-		    if [ "$choice" -eq 7 ]; then
+		    if [ "$choice" -eq 11 ]; then
 			userlist
 			menu
 			fi
-			if [ "$choice" -eq 8 ]; then
+			if [ "$choice" -eq 12 ]; then
 			crontime
 			menu
 			fi
-			if [ "$choice" -eq 9 ]; then
+			if [ "$choice" -eq 13 ]; then
 			token
 			menu
 			fi
@@ -475,10 +497,28 @@ else
 echo -e "Файл ${yellow}crontab${reset} уже существет";
 fi
 }
-function dnsadd {
+function addpolicy {
 echo -e "Добавление политики ${green}nfqws${reset}"
 ndmc -c ip policy Policy0 
 ndmc -c ip policy Policy0 description nfqws
+ndmc -c system configuration save
+sleep 5s
+echo -e "${green}$RoutID${reset}: политика ${green}nfqws${reset} добавлена";
+if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+sendTelegram "$RoutID: политика nfqws добавлена";
+fi
+}
+function delpolicy {
+echo -e "Удаление политики ${green}nfqws${reset}"
+ndmc -c ip no policy Policy0 
+ndmc -c system configuration save
+sleep 5s
+echo -e "${green}$RoutID${reset}: политика ${green}nfqws${reset} удалена";
+if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+sendTelegram "$RoutID: политика nfqws удалена";
+fi
+}
+function dnsadd {
 echo -e "Добавление ${green}DOT${reset}"
 ndmc -c dns-proxy tls upstream 217.160.70.42 sni ns1.opennameserver.org
 ndmc -c system configuration save
@@ -499,16 +539,90 @@ ndmc -c dns-proxy https upstream https://ns2.opennameserver.org/dns-query
 ndmc -c system configuration save
 ndmc -c dns-proxy https upstream https://ns3.opennameserver.org/dns-query
 ndmc -c system configuration save
-ndmc -c dns-proxy https upstream https://ns4.opennameserver.org/dns-query
-ndmc -c system configuration save
 ndmc -c dns-proxy https upstream https://doh.dns.sb/dns-query dnsm
 ndmc -c system configuration save
+
+echo -e "Игнорировать dns ${green}ip4${reset}"
+ndmc -c interface ISP ip dhcp client no name-servers
+ndmc -c system configuration save
+ndmc -c interface PPTP0 ipcp no name-servers
+ndmc -c system configuration save
+ndmc -c  interface UsbQmi0 mobile no name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan4 ip dhcp client no name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan1 ip dhcp client no name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan2 ip dhcp client no name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan3 ip dhcp client no name-servers
+ndmc -c system configuration save
+echo -e "Игнорировать dns ${green}ip6${reset}"
+ndmc -c interface ISP no ipv6 name-servers auto 
+ndmc -c system configuration save
+ndmc -c interface PPTP0 no ipv6 name-servers auto 
+ndmc -c system configuration save
+ndmc -c  interface UsbQmi0 no ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan4 no ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan1 no ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan2 no ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan3 no ipv6 name-servers auto
+ndmc -c system configuration save
+
 sleep 5s
-echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи и политика ${green}nfqws${reset} добавлены";
+echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи добавлены";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: DNS записи и политика nfqws добавлены";
+sendTelegram "$RoutID: DNS записи добавлены";
 fi
 }
+function deldns {
+
+echo -e "Удаление ${green}DOH/DOT${reset}"
+ndmc -c dns-proxy no tls upstream
+ndmc -c dns-proxy no https upstream
+ndmc -c system configuration save
+echo -e "Возврат dns провайдера ${green}ip4${reset}"
+ndmc -c interface ISP ip dhcp client name-servers
+ndmc -c system configuration save
+ndmc -c interface PPTP0 ipcp name-servers
+ndmc -c system configuration save
+ndmc -c  interface UsbQmi0 mobile name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan4 ip dhcp client name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan1 ip dhcp client name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan2 ip dhcp client name-servers
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan3 ip dhcp client name-servers
+ndmc -c system configuration save
+echo -e "Возврат dns провайдера ${green}ip6${reset}"
+ndmc -c interface ISP ipv6 name-servers auto 
+ndmc -c system configuration save
+ndmc -c interface PPTP0 ipv6 name-servers auto 
+ndmc -c system configuration save
+ndmc -c  interface UsbQmi0 ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan4 ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan1 ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan2 ipv6 name-servers auto
+ndmc -c system configuration save
+ndmc -c  interface GigabitEthernet0/Vlan3 ipv6 name-servers auto
+ndmc -c system configuration save
+
+sleep 5s
+echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи удалены";
+if [ -n "$tgToken" -a -n "$tgChatId" ]; then
+sendTelegram "$RoutID: DNS записи удалены";
+fi
+}
+
 function installfull {
 token; 
 installnfqws;
@@ -517,6 +631,7 @@ rm -r /opt/root/_i.sh
 registercron;
 crontabs;
 dnsadd;
+addpolicy;
 crontime;
 echo -e "Доступные команды для ${green}nfqws_updater${reset} $1 \n${green}-menu${reset} - Главное меню
 ${green}-update-userlist${reset} - Обновление userlist
@@ -524,7 +639,13 @@ ${green}-update-nfqws${reset} - Обновление nfqws
 ${green}-token${reset} - Настройка телеграма
 ${green}-restart-nfqws${reset} - Перезагрузка nfqws
 ${green}-remove-nfqws${reset} - Удаление nfqws
+${green}-del-dns${reset} - Добавление DNS записей
+${green}-del-dns${reset} - Удаление DNS записей
+${green}-add-policy${reset} - Добавление политики nfqws
+${green}-del-policy${reset} - Удаление политики nfqws
 ${green}-install-nfqws${reset} - Установка nfqws
+${green}-restart-cron${reset} - Перезагрузка cron
+${green}-install-nfqws-full${reset} - Полная установка nfqws
 ${green}-time-update${reset} - Установка даты и время проверки обновлений nfqws и userlist"
 }
 case "$1" in
@@ -558,6 +679,18 @@ case "$1" in
 	-restart-cron)
     restartcron
 	;;
+	-del-dns)
+    deldns
+	;;
+	-del-dns)
+    dnsadd
+	;;
+	-add-policy)
+    addpolicy
+	;;
+	-del-policy)
+    delpolicy
+	;;
 	*)
 
 echo -e "Доступные команды для ${green}nfqws_updater${reset} $1 \n${green}-menu${reset} - Главное меню
@@ -566,8 +699,12 @@ ${green}-update-nfqws${reset} - Обновление nfqws
 ${green}-token${reset} - Настройка телеграма
 ${green}-restart-nfqws${reset} - Перезагрузка nfqws
 ${green}-remove-nfqws${reset} - Удаление nfqws
+${green}-del-dns${reset} - Добавление DNS записей
+${green}-del-dns${reset} - Удаление DNS записей
+${green}-add-policy${reset} - Добавление политики nfqws
+${green}-del-policy${reset} - Удаление политики nfqws
 ${green}-install-nfqws${reset} - Установка nfqws
 ${green}-restart-cron${reset} - Перезагрузка cron
-${green}-install-nfqws-full${reset} - Полная становка nfqws
+${green}-install-nfqws-full${reset} - Полная установка nfqws
 ${green}-time-update${reset} - Установка даты и время проверки обновлений nfqws и userlist"
 esac
