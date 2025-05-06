@@ -3,7 +3,6 @@
 #Переменные
 RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
 source "/opt/usr/bin/nfqws_var"
-initd_file="/opt/usr/bin/nfqws_var"
 green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
@@ -87,7 +86,7 @@ echo -e "Ваш токен: $tgToken"
 echo Укажите Ваш tgChatId:
 read tgChatId
 echo -e "Ваш чат: $tgChatId"
-#initd_file="/opt/usr/bin/nfqws_var"
+
 script_content='#!/bin/sh 
 tgToken="'${tgToken}'"
 tgChatId="'${tgChatId}'"
@@ -95,6 +94,7 @@ tgChatId="'${tgChatId}'"
         echo -e "Файл ${green}nfqws_var${reset} создан"		
         echo -e "${script_content}" > "${initd_file}" 
         chmod +x "${initd_file}"
+		initd_file="/opt/usr/bin/nfqws_var"
 		#source "/opt/usr/bin/nfqws_var"
 }
 function updatenfqws {
