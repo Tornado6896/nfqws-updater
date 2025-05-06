@@ -86,8 +86,6 @@ echo -e "Ваш токен: $tgToken"
 echo Укажите Ваш tgChatId:
 read tgChatId
 echo -e "Ваш чат: $tgChatId"
-
-
 script_content='#!/bin/sh 
 tgToken="'${tgToken}'"
 tgChatId="'${tgChatId}'"
