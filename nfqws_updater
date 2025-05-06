@@ -2,7 +2,6 @@
 
 #Переменные
 RoutID="$(echo $(hostname) | tr '[:lower:]' '[:upper:]')"
-#source "/opt/usr/bin/nfqws_var"
 green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
