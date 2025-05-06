@@ -86,8 +86,8 @@ echo -e "Ваш токен: $tgToken"
 echo Укажите Ваш tgChatId:
 read tgChatId
 echo -e "Ваш чат: $tgChatId"
-initd_file="/opt/usr/bin/nfqws_var"
-source "/opt/usr/bin/nfqws_var"
+
+
 script_content='#!/bin/sh 
 tgToken="'${tgToken}'"
 tgChatId="'${tgChatId}'"
@@ -95,7 +95,8 @@ tgChatId="'${tgChatId}'"
         echo -e "Файл ${green}nfqws_var${reset} создан"		
         echo -e "${script_content}" > "${initd_file}" 
         chmod +x "${initd_file}"
-		
+initd_file="/opt/usr/bin/nfqws_var"
+source "/opt/usr/bin/nfqws_var"		
 }
 function updatenfqws {
 Ver="$(opkg info nfqws-keenetic | grep "Version:")"
