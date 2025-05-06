@@ -6,24 +6,37 @@ green="\033[32m"
 red="\033[31m"
 yellow="\033[33m"
 reset="\033[0m" 
+echo -e "Проверка наличия файла ${yellow}crontab${reset}"
+var="/opt/usr/bin/nfqws_var"
+if [ ! -e "${var}" ]; then
+echo -e "Файл ${red}crontab${reset} не найден"
+touch /opt/usr/bin/nfqws_var
+chmod +x "${var}"
+echo -e "Файл ${green}crontab${reset} создан";
+else
+echo -e "Файл ${yellow}crontab${reset} уже существет";
+fi
+source $var
 
 # Функции
 function sendTelegram {
   local tgUrl="https://api.telegram.org/bot$tgToken/sendMessage"
   local tgTimeout="10"
   local tgText="$@"
-  source "/opt/usr/bin/nfqws_var"
   local tgCmdArgs="parse_mode=HTML&chat_id=$tgChatId&disable_web_page_preview=1&text=$tgText"
+  #source "/opt/usr/bin/nfqws_var"
+  
   tgCmd=$(curl --max-time $tgTimeout -d "$tgCmdArgs" $tgUrl -s)
   if [ $? -gt 0 ]; then echo "Ошибка оправки в Telegram"; else echo "Сообщение успешно отправлено в Telegram!"; fi
 
 }
 function sendupdatenfqws {
+
 VerWeb2="$(opkg info nfqws-keenetic-web | grep "Version")"
 Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
  echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} обновлена $Ver3. Служба ${green}nfqws-web${reset} обновлена $VerWeb2";
      if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-      sendTelegram "$RoutID: Служба nfqws обновлена $Ver3. Служба nfqws-web обновлена $VerWeb2";
+      sendTelegram "$RoutID: 📦 Служба nfqws обновлена 💡 $Ver3. Служба nfqws-web обновлена 💡 $VerWeb2";
 	  restartnfqws
 	  fi
 	  }
@@ -32,26 +45,26 @@ VerWeb2="$(opkg info nfqws-keenetic-web | grep "Version")"
 Ver3="$(opkg info nfqws-keenetic | grep "Version:")"
  echo -e "${green}$RoutID${reset}: Служба ${green}nfqws${reset} установлена $Ver3. Служба ${green}nfqws-web${reset} установлена $VerWeb2";
      if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-      sendTelegram "$RoutID: Служба nfqws установлена $Ver3. Служба nfqws-web установлена $VerWeb2";
+      sendTelegram "$RoutID: 📦 Служба nfqws установлена 💡 $Ver3. Служба nfqws-web установлена 💡 $VerWeb2";
 	  restartnfqws
 	  fi
 	  }
 function sendupdatenfqwsno {
 echo -e "${red}$RoutID${reset}: Обновлений ${red}nfqws${reset} нет";
 	 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Обновлений nfqws нет";
+	sendTelegram "$RoutID: ❌ Обновлений nfqws нет";
   fi
 }
 function sendupdateuserlist {
 echo -e "${red}$RoutID${reset}: userlist успешно добавлен, новых записей $count3";
 	  if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	  sendTelegram "$RoutID: userlist успешно добавлен, добавлено новых записей $count3";
+	  sendTelegram "$RoutID: 📝 userlist успешно добавлен, добавлено новых записей 💡 $count3";
 	  fi
 }
 function sendupdateuserlistno {
  echo -e "${red}$RoutID${reset}:Обновления ${red}userlist${reset} отсутствуют";
 	if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Обновления userlist отсутствуют";
+	sendTelegram "$RoutID: ❌ Обновления userlist отсутствуют";
 	fi
 }
 function restartnfqws {
@@ -59,7 +72,7 @@ echo -e "Переагрузка ${green}nfqws${reset}"
 /opt/etc/init.d/S51nfqws restart
 echo -e "${yellow}$RoutID${reset}: Служба ${yellow}nfqws${reset} перезапущена";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-	sendTelegram "$RoutID: Служба nfqws перезапущена";
+	sendTelegram "$RoutID: ⚙️ Служба nfqws перезапущена";
 	fi
 }
 function restartcron {
@@ -67,7 +80,7 @@ echo -e "Переагрузка ${green}cron${reset}"
 /opt/etc/init.d/S05crond restart;
 echo -e "${yellow}$RoutID${reset}: Служба ${yellow}cron${reset} перезапущена";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: Служба cron перезапущена";
+sendTelegram "$RoutID: ⚙️ Служба cron перезапущена";
 fi
 }
 function removenfqws {
@@ -80,21 +93,23 @@ delpolicy
 }
 function token {
 echo -e "Настройка отправки уведомлений в ${green}Telegram${reset}"
+
+#var="/opt/usr/bin/nfqws_var"
 echo Укажите Ваш tgToken:
 read tgToken
 echo -e "Ваш токен: $tgToken"
 echo Укажите Ваш tgChatId:
 read tgChatId
 echo -e "Ваш чат: $tgChatId"
-script_content='#!/bin/sh 
+script='#!/bin/sh
 tgToken="'${tgToken}'"
-tgChatId="'${tgChatId}'"
-'
-        echo -e "Файл ${green}nfqws_var${reset} создан"		
-        echo -e "${script_content}" > "${initd_file}" 
-        chmod +x "${initd_file}"
-initd_file="/opt/usr/bin/nfqws_var"
-source "/opt/usr/bin/nfqws_var"		
+tgChatId="'${tgChatId}'"'     
+      
+	    	
+        echo -e "${script}" > "${var}" 
+        chmod +x "${var}"
+	    echo -e "Файл ${green}nfqws_var${reset} создан"	
+ 
 }
 function updatenfqws {
 Ver="$(opkg info nfqws-keenetic | grep "Version:")"
@@ -319,7 +334,7 @@ echo -e "Установка автоматического обновления 
 				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
 				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
 				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
+				sendTelegram "$RoutID:⏰ Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
 				restartcron
 				fi
 		        if [ "$cron_file" -eq 0 ]; then 
@@ -327,7 +342,7 @@ echo -e "Установка автоматического обновления 
 		        echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
 				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
 				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
+				sendTelegram "$RoutID:⏰ Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
 				restartcron
 				fi
 				else
@@ -335,7 +350,7 @@ echo -e "Установка автоматического обновления 
 				echo -e "${cron_expression} nfqws_updater -update-userlist" >> "${initd_crontab}" 
 				echo -e "${cron_expression} nfqws_updater -update-nfqws" >> "${initd_crontab}" 
 				echo -e "${yellow}$RoutID${reset}: Время автоматического обновления ${yellow} nfqws и userlist${reset}: $day_name $formatted_hour:$formatted_minute";
-				sendTelegram "$RoutID: Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
+				sendTelegram "$RoutID:⏰ Время автоматического обновления nfqws и userlist: $day_name $formatted_hour:$formatted_minute";
 				restartcron
 					fi
 					
@@ -505,7 +520,7 @@ ndmc -c system configuration save
 sleep 10s
 echo -e "${green}$RoutID${reset}: политика ${green}nfqws${reset} добавлена";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: политика nfqws добавлена";
+sendTelegram "$RoutID: 🛡 политика nfqws добавлена";
 fi
 }
 function delpolicy {
@@ -515,7 +530,7 @@ ndmc -c system configuration save
 sleep 5s
 echo -e "${green}$RoutID${reset}: политика ${green}nfqws${reset} удалена";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: политика nfqws удалена";
+sendTelegram "$RoutID: 🛡 политика nfqws удалена";
 fi
 }
 function dnsadd {
@@ -576,7 +591,7 @@ ndmc -c system configuration save
 sleep 10s
 echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи добавлены";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: DNS записи добавлены";
+sendTelegram "$RoutID: 🛡 DNS записи добавлены";
 fi
 }
 function deldns {
@@ -619,7 +634,7 @@ ndmc -c system configuration save
 sleep 5s
 echo -e "${green}$RoutID${reset}: ${green}DNS${reset} записи удалены";
 if [ -n "$tgToken" -a -n "$tgChatId" ]; then
-sendTelegram "$RoutID: DNS записи удалены";
+sendTelegram "$RoutID: 🛡 DNS записи удалены";
 fi
 }
 
