@@ -1,4 +1,5 @@
 # nfqws-updater
+[![GitHub Release](https://img.shields.io/github/release/Tornado6896/nfqws-updater?style=flat&color=green)](https://github.com/Tornado6896/nfqws-updater/releases)
 
 > **[!ВНИМАНИЕ]**
 > Данный материал подготовлен в научно-технических целях. 🧑‍💻
